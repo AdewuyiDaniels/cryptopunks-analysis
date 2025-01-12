@@ -1,0 +1,40 @@
+# Ignore .env file (contains API keys and sensitive info)
+.env
+
+# Ignore data directories (if they contain sensitive data)
+data/raw/
+data/processed/
+
+# Ignore Python cache and virtual environment files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore log files
+*.log
+
+# Ignore compiled files
+*.class
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Ignore local development files
+local_settings.py

@@ -1,3 +1,4 @@
+# app.py
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -52,8 +53,31 @@ st.markdown("""
         font-weight: 600;
         margin: 20px 0;
     }
+    .sidebar .sidebar-content {
+        background-color: #F8F9FA;
+    }
+    @media (max-width: 768px) {
+        .metric-card {
+            padding: 10px;
+        }
+        .section-header {
+            font-size: 20px;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
+
+def load_data():
+    """
+    Loads processed CryptoPunks transfer data.
+    """
+    try:
+        df = pd.read_csv(os.path.join(project_root, "data", "processed", "cryptopunks_transfers_cleaned.csv"))
+        df['timeStamp'] = pd.to_datetime(df['timeStamp'])
+        return df
+    except Exception as e:
+        st.error(f"Error loading data: {str(e)}")
+        return None
 
 def filter_data(df, date_filter, size_filter, start_date=None, end_date=None):
     """Filter data based on user selections"""
@@ -90,7 +114,7 @@ def filter_data(df, date_filter, size_filter, start_date=None, end_date=None):
 
 def create_holder_concentration_chart(df):
     """Create holder concentration donut chart"""
-    holder_stats = df.groupby('to')['value'].sum().sort_values(ascending=False)
+    holder_stats = df.groupby('receiver')['value'].sum().sort_values(ascending=False)
     
     top_10_holders = holder_stats.head(10)
     others = pd.Series({'Others': holder_stats[10:].sum()})
@@ -145,114 +169,14 @@ def create_transaction_distribution(df):
     
     return fig
 
-def main():
-    st.title("CryptoPunks Analytics Platform")
-
-    # Load data
-    try:
-        df = pd.read_csv(os.path.join(project_root, "data", "processed", "cryptopunks_transfers_cleaned.csv"))
-        df['timeStamp'] = pd.to_datetime(df['timeStamp'])
-    except Exception as e:
-        st.error("Error loading data. Please check the data file.")
-        return
-
-    # Filter section
-    with st.container():
-        st.markdown('<div class="filter-container">', unsafe_allow_html=True)
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            date_filter = st.selectbox(
-                "Time Period",
-                ["Last 7 Days", "Last 30 Days", "Last 90 Days", "Year to Date", "Custom Range"]
-            )
-        
-        with col2:
-            size_filter = st.multiselect(
-                "Transaction Size",
-                ["Small (<10 ETH)", "Medium (10-50 ETH)", "Large (50-100 ETH)", "Whale (>100 ETH)"],
-                default=["Small (<10 ETH)", "Medium (10-50 ETH)"]
-            )
-        
-        with col3:
-            metrics_filter = st.multiselect(
-                "Show Metrics",
-                ["Price", "Volume", "Holder Count", "Liquidity Score"],
-                default=["Price", "Volume"]
-            )
-        
-        if date_filter == "Custom Range":
-            col4, col5 = st.columns(2)
-            with col4:
-                start_date = st.date_input("Start Date", value=df['timeStamp'].min())
-            with col5:
-                end_date = st.date_input("End Date", value=df['timeStamp'].max())
-        else:
-            start_date = None
-            end_date = None
-
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    # Filter the data
-    filtered_df = filter_data(df, date_filter, size_filter, start_date, end_date)
-
-    # Key Metrics Dashboard
-    with st.container():
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.metric(
-                "Total Volume",
-                f"Ξ {filtered_df['value'].sum():,.2f}",
-                f"+{(filtered_df['value'].tail(7).sum() / filtered_df['value'].head(7).sum() - 1):.1%}"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-        with col2:
-            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.metric(
-                "Active Holders",
-                f"{filtered_df['to'].nunique():,}",
-                f"+{(filtered_df['to'].tail(7).nunique() / filtered_df['to'].head(7).nunique() - 1):.1%}"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-        with col3:
-            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.metric(
-                "Avg Transaction",
-                f"Ξ {filtered_df['value'].mean():,.2f}",
-                f"{(filtered_df['value'].tail(7).mean() / filtered_df['value'].head(7).mean() - 1):.1%}"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-        with col4:
-            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.metric(
-                "Daily Transactions",
-                f"{filtered_df.groupby(filtered_df['timeStamp'].dt.date)['value'].count().mean():.0f}",
-                f"{(filtered_df.tail(7)['value'].count() / filtered_df.head(7)['value'].count() - 1):.1%}"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
-
-    # Holder and Transaction Distribution Charts
-    col1, col2 = st.columns(2)
+def create_price_analysis_chart(df):
+    """Create price analysis chart"""
+    fig = go.Figure()
     
-    with col1:
-        st.plotly_chart(create_holder_concentration_chart(filtered_df), use_container_width=True)
-    
-    with col2:
-        st.plotly_chart(create_transaction_distribution(filtered_df), use_container_width=True)
-
-    # Price Analysis
-    st.markdown('<div class="section-header">Price Analysis</div>', unsafe_allow_html=True)
-    fig_price = go.Figure()
-    
-    fig_price.add_trace(
+    fig.add_trace(
         go.Scatter(
-            x=filtered_df['timeStamp'],
-            y=filtered_df['value'],
+            x=df['timeStamp'],
+            y=df['value'],
             name='Price',
             line=dict(color='#1E88E5', width=1),
             fill='tonexty',
@@ -260,16 +184,16 @@ def main():
         )
     )
     
-    fig_price.add_trace(
+    fig.add_trace(
         go.Scatter(
-            x=filtered_df['timeStamp'],
-            y=filtered_df['value'].rolling(7).mean(),
+            x=df['timeStamp'],
+            y=df['value'].rolling(7).mean(),
             name='7-day MA',
             line=dict(color='#FFA000', width=2)
         )
     )
     
-    fig_price.update_layout(
+    fig.update_layout(
         template='plotly',
         height=500,
         margin=dict(l=20, r=20, t=40, b=20),
@@ -286,19 +210,19 @@ def main():
         )
     )
     
-    st.plotly_chart(fig_price, use_container_width=True)
+    return fig
 
-    # Volume Analysis
-    st.markdown('<div class="section-header">Trading Activity</div>', unsafe_allow_html=True)
-    daily_volume = filtered_df.resample('D', on='timeStamp')['value'].agg(['sum', 'count']).reset_index()
+def create_volume_analysis_chart(df):
+    """Create volume analysis chart"""
+    daily_volume = df.resample('D', on='timeStamp')['value'].agg(['sum', 'count']).reset_index()
     
-    fig_volume = make_subplots(
+    fig = make_subplots(
         rows=1, cols=2,
         subplot_titles=('Daily Trading Volume', 'Transaction Count'),
         specs=[[{"type": "bar"}, {"type": "bar"}]]
     )
     
-    fig_volume.add_trace(
+    fig.add_trace(
         go.Bar(
             x=daily_volume['timeStamp'],
             y=daily_volume['sum'],
@@ -308,7 +232,7 @@ def main():
         row=1, col=1
     )
     
-    fig_volume.add_trace(
+    fig.add_trace(
         go.Bar(
             x=daily_volume['timeStamp'],
             y=daily_volume['count'],
@@ -318,7 +242,7 @@ def main():
         row=1, col=2
     )
     
-    fig_volume.update_layout(
+    fig.update_layout(
         template='plotly',
         height=400,
         showlegend=True,
@@ -327,7 +251,111 @@ def main():
         margin=dict(l=20, r=20, t=40, b=20)
     )
     
-    st.plotly_chart(fig_volume, use_container_width=True)
+    return fig
+
+def main():
+    st.title("CryptoPunks Analytics Platform")
+    st.markdown("""
+        Welcome to the **CryptoPunks Analytics Platform**! This dashboard provides insights into CryptoPunks transactions, 
+        including holder concentration, transaction size distribution, price analysis, and trading activity.
+    """)
+
+    # Load data
+    df = load_data()
+    if df is None:
+        return
+
+    # Sidebar for filters
+    with st.sidebar:
+        st.header("Filters")
+        date_filter = st.selectbox(
+            "Time Period",
+            ["Last 7 Days", "Last 30 Days", "Last 90 Days", "Year to Date", "Custom Range"]
+        )
+        
+        size_filter = st.multiselect(
+            "Transaction Size",
+            ["Small (<10 ETH)", "Medium (10-50 ETH)", "Large (50-100 ETH)", "Whale (>100 ETH)"],
+            default=["Small (<10 ETH)", "Medium (10-50 ETH)"]
+        )
+        
+        if date_filter == "Custom Range":
+            # Set default date range from 01/01/2017 to 01/01/2025
+            start_date = st.date_input("Start Date", value=datetime(2017, 1, 1))
+            end_date = st.date_input("End Date", value=datetime(2025, 1, 1))
+        else:
+            start_date = None
+            end_date = None
+
+    # Filter the data
+    filtered_df = filter_data(df, date_filter, size_filter, start_date, end_date)
+
+    # Key Metrics Dashboard
+    st.markdown('<div class="section-header">Key Metrics</div>', unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        st.metric(
+            "Total Volume",
+            f"Ξ {filtered_df['value'].sum():,.2f}",
+            f"+{(filtered_df['value'].tail(7).sum() / filtered_df['value'].head(7).sum() - 1):.1%}"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+    with col2:
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        st.metric(
+            "Active Holders",
+            f"{filtered_df['receiver'].nunique():,}",
+            f"+{(filtered_df['receiver'].tail(7).nunique() / filtered_df['receiver'].head(7).nunique() - 1):.1%}"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+    with col3:
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        st.metric(
+            "Avg Transaction",
+            f"Ξ {filtered_df['value'].mean():,.2f}",
+            f"{(filtered_df['value'].tail(7).mean() / filtered_df['value'].head(7).mean() - 1):.1%}"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+    with col4:
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        st.metric(
+            "Daily Transactions",
+            f"{filtered_df.groupby(filtered_df['timeStamp'].dt.date)['value'].count().mean():.0f}",
+            f"{(filtered_df.tail(7)['value'].count() / filtered_df.head(7)['value'].count() - 1):.1%}"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # Holder and Transaction Distribution Charts
+    st.markdown('<div class="section-header">Holder and Transaction Distribution</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.plotly_chart(create_holder_concentration_chart(filtered_df), use_container_width=True)
+    
+    with col2:
+        st.plotly_chart(create_transaction_distribution(filtered_df), use_container_width=True)
+
+    # Price Analysis
+    st.markdown('<div class="section-header">Price Analysis</div>', unsafe_allow_html=True)
+    st.plotly_chart(create_price_analysis_chart(filtered_df), use_container_width=True)
+
+    # Volume Analysis
+    st.markdown('<div class="section-header">Trading Activity</div>', unsafe_allow_html=True)
+    st.plotly_chart(create_volume_analysis_chart(filtered_df), use_container_width=True)
+
+    # Footer
+    st.markdown("---")
+    st.markdown("""
+        <div style="text-align: center; color: #666;">
+            <p>Developed by Daniel</p>
+            <p>Contact: <a href="mailto:adewuyiaby@gmail.com">adewuyiaby@gmail.com</a></p>
+        </div>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
