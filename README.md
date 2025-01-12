@@ -110,6 +110,10 @@ This will open the dashboard in your default web browser.
 - **Transaction Size Distribution**: A bar chart showing the distribution of transaction sizes.
 - **Price Analysis**: A line chart showing the price trend and 7-day moving average.
 - **Trading Activity**: Bar charts showing daily trading volume and transaction count.
+
+
+
+
 ![image](https://github.com/user-attachments/assets/ea77e37a-bcb9-404f-9177-5f1a445f7694)
 ![image](https://github.com/user-attachments/assets/0cf3260b-497c-4029-abb0-dba4c7090af3)
 ![image](https://github.com/user-attachments/assets/eb647105-2868-4316-8d6f-ce9ad65ea36a)
