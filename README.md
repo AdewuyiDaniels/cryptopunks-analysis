@@ -1,8 +1,5 @@
 # CryptoPunks Analysis Platform
 
-### Streamlit Dashboard Example  
-*Replace with a direct link to an image of your dashboard*
-
 This repository contains the code for a **CryptoPunks analytics platform** that fetches transaction data, cleans and analyzes it, and presents insights through an interactive Streamlit dashboard. The platform provides key metrics, visualizations, and filtering options to help users understand the CryptoPunks market.
 
 ---
