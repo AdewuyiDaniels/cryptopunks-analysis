@@ -51,84 +51,83 @@ This project provides an advanced analytics dashboard for **CryptoPunks**, one o
    cd cryptopunks-analysis
 Install the required dependencies:
 
-bash
-Copy
-pip install -r requirements.txt
+      pip install -r requirements.txt
 Place your dataset (cryptopunks_transfers_cleaned.csv) in the data/processed/ folder.
 
 Run the Streamlit app:
 
-bash
-Copy
-streamlit run app.py
+         streamlit run app.py
+
 Open your browser and navigate to the provided URL (e.g., http://localhost:8501).
 
 Project Structure
-Copy
-cryptopunks-analysis/
-├── data/
-│   └── processed/
-│       └── cryptopunks_transfers_cleaned.csv  # Dataset
-├── scripts/
-│   └── analyze_cryptopunks_data.py  # Analysis logic
-├── app.py  # Streamlit dashboard
-├── requirements.txt  # Dependencies
-└── README.md  # Project documentation
+
+               cryptopunks-analysis/
+               ├── data/
+               │   └── processed/
+               │       └── cryptopunks_transfers_cleaned.csv  # Dataset
+               ├── scripts/
+               │   └── analyze_cryptopunks_data.py  # Analysis logic
+               ├── app.py  # Streamlit dashboard
+               ├── requirements.txt  # Dependencies
+               └── README.md  # Project documentation
+
+
+
 Dataset
 The dataset (cryptopunks_transfers_cleaned.csv) should contain the following columns:
 
-blockNumber: Block number of the transaction.
-
-timeStamp: Timestamp of the transaction.
-
-from: Sender address.
-
-to: Receiver address.
-
-value: Transaction value in ETH.
-
-tokenName: Name of the token (e.g., "CRYPTOPUNKS").
-
-tokenSymbol: Symbol of the token (e.g., "Ͼ").
-
-tokenDecimal: Decimal precision of the token.
+   blockNumber: Block number of the transaction.
+   
+   timeStamp: Timestamp of the transaction.
+   
+   from: Sender address.
+   
+   to: Receiver address.
+   
+   value: Transaction value in ETH.
+   
+   tokenName: Name of the token (e.g., "CRYPTOPUNKS").
+   
+   tokenSymbol: Symbol of the token (e.g., "Ͼ").
+   
+   tokenDecimal: Decimal precision of the token.
 
 Usage
-Holder Analysis:
+1. Holder Analysis:
 
-View the distribution of holders (Small, Medium, Large, Whales).
+   View the distribution of holders (Small, Medium, Large, Whales).
+   
+   Track how holdings change over time.
 
-Track how holdings change over time.
+2. Liquidity Analysis:
 
-Liquidity Analysis:
+   Analyze daily trading volume and liquidity scores.
+   
+   Market Impact Analysis:
+   
+   Identify whale transactions and their impact on prices.
 
-Analyze daily trading volume and liquidity scores.
+3. Anomaly Detection:
 
-Market Impact Analysis:
+   Detect unusual transactions using statistical methods.
 
-Identify whale transactions and their impact on prices.
+## Contributing
 
-Anomaly Detection:
-
-Detect unusual transactions using statistical methods.
-
-Contributing
 Contributions are welcome! If you'd like to contribute, please follow these steps:
 
-Fork the repository.
+1. Fork the repository.
 
-Create a new branch for your feature or bugfix.
+2. Create a new branch for your feature or bugfix.
 
-Commit your changes.
+3. Commit your changes.
 
-Submit a pull request.
+4. Submit a pull request.
 
-License
+## License
 This project is licensed under the MIT License. See the LICENSE file for details.
 
-Acknowledgments
-Larva Labs: For creating CryptoPunks.
-
+## Acknowledgments
 Streamlit: For making it easy to build interactive dashboards.
 
 Plotly: For creating beautiful and interactive visualizations.
